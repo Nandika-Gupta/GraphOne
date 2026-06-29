@@ -17,6 +17,8 @@ import { recalculateTrending } from "./jobs/recalculateTrending";
 import { openapiSpec } from "./docs/openapi";
 import { ok } from "./shared/types";
 
+(BigInt.prototype as any).toJSON = function () { return Number(this); };
+
 const app = express();
 
 app.use(helmet());
