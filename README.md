@@ -1,6 +1,6 @@
 # GraphOne - AI Economy Intelligence Platform
 
-The global intelligence layer for AI: companies, investors, products, founders, and funding rounds — connected in one graph.
+The global intelligence layer for AI: companies, investors, products, founders, and funding rounds - connected in one graph.
 
 **Live Frontend:** https://graph-one-three.vercel.app/  
 **Backend API:** https://graphone-k6m8.onrender.com/api/v1  
@@ -165,7 +165,7 @@ Seeds: **55 companies · 22 investors · 35 products · funding rounds · founde
 
 ## What Would I Build Next (With 2 More Days)
 
-1. **Founder graph** — link founders across companies and show career trajectory timelines.
-2. **Funding alerts** — webhook-based notifications when a watched company raises a new round.
-3. **Competitive intelligence** — auto-cluster companies by embedding similarity to surface non-obvious competitors.
-4. **Auth + watchlists** — user accounts with saved companies, followed investors, and a personalised feed.
+1. **Founder graph** - link founders across companies and show career trajectory timelines.
+2. **Funding alerts** - webhook-based notifications when a watched company raises a new round.
+3. **Competitive intelligence** - auto-cluster companies by embedding similarity to surface non-obvious competitors.
+4. **Auth + watchlists** - user accounts with saved companies, followed investors, and a personalised feed.
