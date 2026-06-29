@@ -45,12 +45,12 @@ function Hero() {
   const router = useRouter();
   const { openSearch } = useApp();
   const filters = [
-    { label: "AI Agents", color: "var(--cat-agents)" },
-    { label: "AI Coding", color: "var(--cat-coding)" },
-    { label: "AI Search", color: "var(--cat-search)" },
-    { label: "AI Video", color: "var(--cat-video)" },
-    { label: "AI Voice", color: "var(--cat-voice)" },
-    { label: "AI Infrastructure", color: "var(--cat-infra)" },
+    { label: "AI Agents", slug: "ai-agents", color: "var(--cat-agents)" },
+    { label: "AI Coding", slug: "coding-tools", color: "var(--cat-coding)" },
+    { label: "AI Search", slug: "ai-search", color: "var(--cat-search)" },
+    { label: "AI Video", slug: "ai-video", color: "var(--cat-video)" },
+    { label: "AI Voice", slug: "ai-voice", color: "var(--cat-voice)" },
+    { label: "AI Infrastructure", slug: "infrastructure", color: "var(--cat-infra)" },
   ];
   const nodes = [
     { x: 58, y: 8, name: "OpenAI", c: "var(--rose-500)" },
@@ -82,7 +82,11 @@ function Hero() {
           </div>
           <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 18 }}>
             {filters.map((f) => (
-              <span key={f.label} style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 32, padding: "0 12px", borderRadius: 999, border: "1px solid var(--border-subtle)", background: "var(--surface-card)", fontSize: 12.5, fontWeight: 600, color: "var(--gray-700)", cursor: "pointer" }}>
+              <span
+                key={f.label}
+                onClick={() => router.push("/startups?category=" + f.slug)}
+                style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 32, padding: "0 12px", borderRadius: 999, border: "1px solid var(--border-subtle)", background: "var(--surface-card)", fontSize: 12.5, fontWeight: 600, color: "var(--gray-700)", cursor: "pointer" }}
+              >
                 <span style={{ width: 6, height: 6, borderRadius: 999, background: f.color }} />
                 {f.label}
               </span>
@@ -266,15 +270,16 @@ function Emerging() {
 }
 
 function Categories() {
+  const router = useRouter();
   const cats = [
-    { name: "AI Agents", count: "1,248", color: "var(--cat-agents)" },
-    { name: "AI Coding", count: "863", color: "var(--cat-coding)" },
-    { name: "AI Search", count: "324", color: "var(--cat-search)" },
-    { name: "AI Video", count: "563", color: "var(--cat-video)" },
-    { name: "AI Voice", count: "412", color: "var(--cat-voice)" },
-    { name: "AI Infrastructure", count: "972", color: "var(--cat-infra)" },
-    { name: "Healthcare AI", count: "687", color: "var(--cat-health)" },
-    { name: "Robotics", count: "396", color: "var(--cat-robotics)" },
+    { name: "AI Agents", slug: "ai-agents", count: "1,248", color: "var(--cat-agents)" },
+    { name: "AI Coding", slug: "coding-tools", count: "863", color: "var(--cat-coding)" },
+    { name: "AI Search", slug: "ai-search", count: "324", color: "var(--cat-search)" },
+    { name: "AI Video", slug: "ai-video", count: "563", color: "var(--cat-video)" },
+    { name: "AI Voice", slug: "ai-voice", count: "412", color: "var(--cat-voice)" },
+    { name: "AI Infrastructure", slug: "infrastructure", count: "972", color: "var(--cat-infra)" },
+    { name: "Healthcare AI", slug: "healthcare-ai", count: "687", color: "var(--cat-health)" },
+    { name: "Robotics", slug: "robotics", count: "396", color: "var(--cat-robotics)" },
   ];
   return (
     <section style={{ maxWidth: 1240, margin: "28px auto 0", padding: "0 28px" }}>
@@ -282,6 +287,7 @@ function Categories() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 10 }}>
         {cats.map((cat) => (
           <div key={cat.name}
+            onClick={() => router.push("/startups?category=" + cat.slug)}
             style={{ borderRadius: 14, background: "var(--surface-card)", border: "1px solid var(--border-subtle)", padding: "16px 12px", cursor: "pointer", transition: "border-color .15s, transform .15s" }}
             onMouseEnter={(e) => { const el = e.currentTarget as HTMLDivElement; el.style.borderColor = cat.color; el.style.transform = "translateY(-2px)"; }}
             onMouseLeave={(e) => { const el = e.currentTarget as HTMLDivElement; el.style.borderColor = "var(--border-subtle)"; el.style.transform = "translateY(0)"; }}
@@ -322,7 +328,7 @@ function Unicorns() {
             </div>
           ))}
         </div>
-        <span style={{ width: 34, height: 34, borderRadius: 999, background: "var(--surface-card)", boxShadow: "var(--shadow-sm)", display: "flex", alignItems: "center", justifyContent: "center", flex: "none", cursor: "pointer" }}>
+        <span onClick={() => router.push("/startups?unicorn=true")} style={{ width: 34, height: 34, borderRadius: 999, background: "var(--surface-card)", boxShadow: "var(--shadow-sm)", display: "flex", alignItems: "center", justifyContent: "center", flex: "none", cursor: "pointer" }}>
           <ChevronRight size={16} color="var(--gray-700)" />
         </span>
       </div>

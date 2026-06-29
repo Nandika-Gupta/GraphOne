@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Rocket, Layers, Users, TrendingUp, Briefcase, Globe, Plus, GitBranch } from "lucide-react";
+import { Home, Rocket, Layers, Users, TrendingUp, Briefcase, Globe, Plus, GitBranch, Moon, Sun } from "lucide-react";
 import { useApp } from "@/components/providers/AppProvider";
 import { LogoMark } from "@/components/ui/LogoMark";
 
@@ -19,7 +19,7 @@ const NAV = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { openSubmit } = useApp();
+  const { openSubmit, theme, toggleTheme } = useApp();
 
   return (
     <aside style={{ width: 220, flex: "none", borderRight: "1px solid var(--border-subtle)", background: "var(--surface-card)", display: "flex", flexDirection: "column", minHeight: "100vh", position: "sticky", top: 0 }}>
@@ -51,8 +51,18 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div style={{ padding: "12px 10px 20px", borderTop: "1px solid var(--border-subtle)" }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--gray-400)", textTransform: "uppercase", letterSpacing: "0.05em", padding: "0 12px 8px" }}>Contribute</div>
+      <div style={{ padding: "12px 10px 8px", borderTop: "1px solid var(--border-subtle)" }}>
+        <button
+          onClick={toggleTheme}
+          style={{ display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "9px 12px", borderRadius: 10, border: "none", background: "transparent", color: "var(--gray-600)", fontSize: 13.5, fontWeight: 500, cursor: "pointer", textAlign: "left", fontFamily: "var(--font-sans)" }}
+        >
+          {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+          {theme === "dark" ? "Light mode" : "Dark mode"}
+        </button>
+      </div>
+
+      <div style={{ padding: "4px 10px 20px", borderTop: "1px solid var(--border-subtle)" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--gray-400)", textTransform: "uppercase", letterSpacing: "0.05em", padding: "8px 12px 8px" }}>Contribute</div>
         <button
           onClick={() => openSubmit("startup")}
           style={{ display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "9px 12px", borderRadius: 10, border: "none", background: "transparent", color: "var(--gray-600)", fontSize: 13.5, fontWeight: 500, cursor: "pointer", textAlign: "left", fontFamily: "var(--font-sans)" }}
