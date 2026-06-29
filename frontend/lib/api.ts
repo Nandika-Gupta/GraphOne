@@ -129,7 +129,7 @@ export function mapInvestor(inv: ApiInvestor): Investor {
   // Unique portfolio companies
   const seenSlugs = new Set<string>();
   for (const e of investments) seenSlugs.add(e.round.company.slug);
-  const portfolioSlugs = [...seenSlugs];
+  const portfolioSlugs = Array.from(seenSlugs);
 
   const deals90d = investments.filter(
     (e) => now - new Date(e.round.announcedAt).getTime() < ms90d,
