@@ -1,4 +1,4 @@
-# GraphOne — AI Economy Intelligence Platform
+# GraphOne - AI Economy Intelligence Platform
 
 The global intelligence layer for AI: companies, investors, products, founders, and funding rounds — connected in one graph.
 
