@@ -163,7 +163,7 @@ export function mapInvestor(inv: ApiInvestor): Investor {
     const cat = e.round.company.category?.name ?? "Other";
     catCounts.set(cat, (catCounts.get(cat) ?? 0) + 1);
   }
-  const topCats = [...catCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const topCats = Array.from(catCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
   const catTotal = topCats.reduce((s, [, n]) => s + n, 0) || 1;
   const sectors: InvestorSector[] = topCats.map(([label, n], i) => ({
     label,
