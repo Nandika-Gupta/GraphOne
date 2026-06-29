@@ -32,7 +32,19 @@ api.get("/investors/most-active", asyncH(async (_req, res) => {
 }));
 api.get("/investors/:slug", asyncH(async (req, res) => {
   const { slug } = req.params as { slug: string };
-  const inv = await prisma.investor.findUnique({ where: { slug } });
+  const inv = await prisma.investor.findUnique({
+    where: { slug },
+    include: {
+      investments: {
+        orderBy: { round: { announcedAt: "desc" } },
+        include: {
+          round: {
+            include: { company: { include: { category: true } } },
+          },
+        },
+      },
+    },
+  });
   res.json(ok(inv));
 }));
 api.get("/investors/:slug/investments", asyncH(async (req, res) => {

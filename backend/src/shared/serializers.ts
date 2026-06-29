@@ -21,9 +21,7 @@ export function serializeCompany(c: any) {
     growthScore: c.growthScore ?? 0,
     dataConfidenceScore: c.dataConfidenceScore ?? 0,
     trendingScore: c.trendingScore ?? 0,
-    category: c.category
-      ? { slug: c.category.slug, name: c.category.name, colorHex: c.category.colorHex ?? null }
-      : null,
+    category: c.category ? { slug: c.category.slug, name: c.category.name, colorHex: c.category.colorHex ?? null } : null,
     tags: Array.isArray(c.tags)
       ? c.tags.map((t: any) => ({ tag: { name: t.tag?.name ?? t.name ?? String(t) } }))
       : [],

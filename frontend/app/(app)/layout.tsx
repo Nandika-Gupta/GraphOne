@@ -1,11 +1,11 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { Search, Moon, Sun } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useApp } from "@/components/providers/AppProvider";
 
 function AppTopBar() {
-  const { openSearch } = useApp();
+  const { openSearch, theme, toggleTheme } = useApp();
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 18, padding: "12px 28px", position: "sticky", top: 0, background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)", zIndex: 30, borderBottom: "1px solid var(--border-subtle)" }}>
       <div
@@ -16,7 +16,14 @@ function AppTopBar() {
         <span style={{ flex: 1, fontSize: 14, color: "var(--text-subtle)", fontFamily: "var(--font-sans)" }}>Search startups, products, investors…</span>
         <kbd style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--gray-400)", border: "1px solid var(--border-default)", borderRadius: 6, padding: "1px 7px", background: "var(--surface-card)" }}>/</kbd>
       </div>
-      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
+        <button
+          onClick={toggleTheme}
+          aria-label="Toggle theme"
+          style={{ width: 36, height: 36, borderRadius: 9, border: "1px solid var(--border-default)", background: "var(--surface-card)", color: "var(--gray-600)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+        >
+          {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
         <div style={{ width: 36, height: 36, borderRadius: 999, background: "linear-gradient(135deg,#FFB199,#FF4D7A)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>A</div>
       </div>
     </div>

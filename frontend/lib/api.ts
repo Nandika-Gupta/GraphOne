@@ -3,7 +3,7 @@
  * Used in Next.js Server Components (page.tsx files) — never import in client components.
  */
 
-import type { Company, Investor, Product, NewsItem, Stats } from "@/types";
+import type { Company, Investor, Product, NewsItem, Stats, InvestorSector } from "@/types";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000/api/v1";
 const KEY  = process.env.API_KEY ?? "dev-key-123";
@@ -84,7 +84,7 @@ export function mapCompany(c: ApiCompany): Company {
     tags: (c.tags ?? []).map((t) => t.tag.name),
     founders: (c.founders ?? []).map((f) => ({ name: f.founder.name, role: f.role ?? "" })),
     productSlugs: (c.products ?? []).map((p) => p.slug),
-    investorSlugs: [],
+    investorSlugs: [...new Set(rounds.flatMap((r) => r.leads))],
     rounds,
     similar: [],
     timeline: rounds.map((r) => ({ year: String(r.year), label: `${r.stage} · ${r.amount}` })),
@@ -92,17 +92,96 @@ export function mapCompany(c: ApiCompany): Company {
   };
 }
 
+interface ApiInvestmentRound {
+  id: string; stage: string; amountUsd: number; announcedAt: string;
+  company: { slug: string; name: string; category: { name: string; colorHex: string | null } | null };
+}
+interface ApiInvestmentEntry { isLead: boolean; round: ApiInvestmentRound }
+
 interface ApiInvestor {
   id: string; slug: string; name: string; type: string; hqLocation: string | null;
   foundedYear: number | null; isVerified: boolean; avgCheckSizeUsd: number | null;
   fundNumber: number | null; aumUsd: number | null; thesis: string | null;
+  stageFocus?: string[];
+  investments?: ApiInvestmentEntry[];
 }
 
+const INVESTOR_TYPE_LABELS: Record<string, string> = {
+  VC: "VC", ANGEL: "Angel", ACCELERATOR: "Accelerator",
+  CORPORATE: "Corporate", GROWTH_EQUITY: "Growth Equity", PE: "PE", SOVEREIGN: "Sovereign",
+};
+
+const STAGE_LABELS: Record<string, string> = {
+  PRE_SEED: "Pre-Seed", SEED: "Seed", SERIES_A: "Series A", SERIES_B: "Series B",
+  SERIES_C: "Series C", SERIES_D: "Series D", SERIES_E: "Series E", GROWTH: "Growth", IPO: "IPO",
+};
+
+const SECTOR_COLORS = [
+  "#FF4D7A", "#8B5CF6", "#10B981", "#3B82F6", "#EC4899",
+  "#F97316", "#14B8A6", "#22C55E", "#A855F7", "#0EA5E9",
+];
+
 export function mapInvestor(inv: ApiInvestor): Investor {
+  const investments = inv.investments ?? [];
+  const now = Date.now();
+  const ms90d = 90 * 86_400_000;
+
+  // Unique portfolio companies
+  const seenSlugs = new Set<string>();
+  for (const e of investments) seenSlugs.add(e.round.company.slug);
+  const portfolioSlugs = [...seenSlugs];
+
+  const deals90d = investments.filter(
+    (e) => now - new Date(e.round.announcedAt).getTime() < ms90d,
+  ).length;
+
+  const recent = investments.slice(0, 6).map((e) => ({
+    companySlug: e.round.company.slug,
+    company: e.round.company.name,
+    cat: e.round.company.category?.name ?? "AI",
+    stage: STAGE_LABELS[e.round.stage] ?? e.round.stage.replace(/_/g, " "),
+    amount: fmtUsd(e.round.amountUsd),
+    role: e.isLead ? "Lead Investor" : "Co-Investor",
+  }));
+
+  // Quarterly velocity — last 4 quarters
+  const velocity = Array.from({ length: 4 }, (_, i) => {
+    const qi = 3 - i;
+    const endMs = now - qi * 91 * 86_400_000;
+    const startMs = endMs - 91 * 86_400_000;
+    const d = new Date(endMs);
+    const deals = investments.filter((e) => {
+      const t = new Date(e.round.announcedAt).getTime();
+      return t >= startMs && t < endMs;
+    }).length;
+    return { label: `Q${Math.ceil((d.getMonth() + 1) / 3)} '${String(d.getFullYear()).slice(2)}`, deals };
+  });
+
+  // Sector concentration from portfolio categories
+  const catCounts = new Map<string, number>();
+  for (const e of investments) {
+    const cat = e.round.company.category?.name ?? "Other";
+    catCounts.set(cat, (catCounts.get(cat) ?? 0) + 1);
+  }
+  const topCats = [...catCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const catTotal = topCats.reduce((s, [, n]) => s + n, 0) || 1;
+  const sectors: InvestorSector[] = topCats.map(([label, n], i) => ({
+    label,
+    v: Math.round((n / catTotal) * 100),
+    c: SECTOR_COLORS[i] ?? "#8B5CF6",
+  }));
+  // Ensure percentages sum to 100
+  if (sectors.length > 0) {
+    const diff = 100 - sectors.reduce((s, sec) => s + sec.v, 0);
+    if (diff !== 0) sectors[sectors.length - 1]!.v += diff;
+  }
+
+  const stages = (inv.stageFocus ?? []).map((s) => STAGE_LABELS[s] ?? s.replace(/_/g, " "));
+
   return {
     slug: inv.slug,
     name: inv.name,
-    type: inv.type,
+    type: INVESTOR_TYPE_LABELS[inv.type] ?? inv.type,
     hq: inv.hqLocation ?? "",
     founded: inv.foundedYear ?? 0,
     verified: inv.isVerified,
@@ -111,14 +190,14 @@ export function mapInvestor(inv: ApiInvestor): Investor {
     aum: inv.aumUsd && inv.aumUsd > 0 ? fmtUsd(inv.aumUsd) : "—",
     thesis: inv.thesis ?? "",
     partners: [],
-    sectors: [],
-    stages: [],
-    portfolioSlugs: [],
-    portfolioCount: 0,
-    deals90d: 0,
+    sectors,
+    stages,
+    portfolioSlugs,
+    portfolioCount: portfolioSlugs.length,
+    deals90d,
     coInvestors: [],
-    recent: [],
-    velocity: [],
+    recent,
+    velocity,
   };
 }
 
@@ -168,8 +247,18 @@ export async function getTrendingCompanies(limit = 12): Promise<Company[]> {
 }
 
 export async function getInvestor(slug: string): Promise<Investor | null> {
-  const data = await apiFetch<ApiInvestor>(`/investors/${slug}`);
-  return data ? mapInvestor(data) : null;
+  const [data, coData] = await Promise.all([
+    apiFetch<ApiInvestor>(`/investors/${slug}`),
+    apiFetch<{ investor: { slug: string; name: string }; count: number }[]>(`/investors/${slug}/co-investors`),
+  ]);
+  if (!data) return null;
+  const investor = mapInvestor(data);
+  investor.coInvestors = (coData ?? []).slice(0, 8).map((co) => ({
+    slug: co.investor.slug,
+    name: co.investor.name,
+    shared: co.count,
+  }));
+  return investor;
 }
 
 export async function getInvestors(limit = 20): Promise<Investor[]> {

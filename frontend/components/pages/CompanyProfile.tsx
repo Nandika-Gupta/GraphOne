@@ -45,6 +45,10 @@ function CompanyHeader({ c }: { c: Company }) {
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
             {c.tags.map((t) => <span key={t} style={{ fontSize: 12, fontWeight: 600, color: "var(--gray-600)", background: "var(--surface-subtle)", border: "1px solid var(--border-subtle)", borderRadius: 999, padding: "4px 11px" }}>{t}</span>)}
           </div>
+          <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+            <button style={{ fontSize: 13, fontWeight: 600, color: "#fff", background: "var(--rose-500)", border: "none", borderRadius: 999, padding: "8px 18px", cursor: "pointer" }}>Follow Company</button>
+            <button style={{ fontSize: 13, fontWeight: 600, color: "var(--gray-700)", background: "transparent", border: "1px solid var(--border-default)", borderRadius: 999, padding: "8px 18px", cursor: "pointer" }}>Save</button>
+          </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, flex: "none", textAlign: "right" }}>
           {([["Valuation", c.valuation], ["Total Raised", c.raised], ["Category", c.cat]] as [string, string][]).map(([l, v]) => (
@@ -179,7 +183,11 @@ function ProductsList({ c }: { c: Company }) {
 
 function SimilarCompanies({ c }: { c: Company }) {
   const router = useRouter();
-  const sims = c.similar.map((s) => GODATA.companyBySlug[s]).filter(Boolean);
+  const fromSlugs = c.similar.map((s) => GODATA.companyBySlug[s]).filter(Boolean);
+  const fromCat = fromSlugs.length
+    ? fromSlugs
+    : GODATA.companies.filter((o) => o.cat === c.cat && o.slug !== c.slug).slice(0, 5);
+  const sims = fromCat;
   if (!sims.length) return null;
   return (
     <Panel n="7" title="Similar Companies" action="View more">
@@ -208,7 +216,7 @@ export function CompanyProfile({ slug, company }: { slug: string; company?: Comp
   return (
     <div style={{ background: "var(--surface-subtle)", minHeight: "100%" }}>
       <div style={{ maxWidth: 1180, margin: "0 auto", padding: "24px 28px 56px", display: "flex", flexDirection: "column", gap: 16 }}>
-        <a onClick={() => router.push("/")} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "var(--text-muted)", cursor: "pointer" }}>
+        <a onClick={() => router.push("/startups")} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "var(--text-muted)", cursor: "pointer" }}>
           <ChevronLeft size={15} /> Back to Companies
         </a>
         <CompanyHeader c={c} />
