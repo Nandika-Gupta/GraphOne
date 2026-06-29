@@ -2,6 +2,19 @@
 
 The global intelligence layer for AI: companies, investors, products, founders, and funding rounds - connected in one graph.
 
+![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat&logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat&logo=typescript&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4-000000?style=flat&logo=express&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat&logo=prisma&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Postgres-3ECF8E?style=flat&logo=supabase&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=flat&logo=vercel&logoColor=white)
+![Render](https://img.shields.io/badge/Render-Live-46E3B7?style=flat&logo=render&logoColor=white)
+
+![Status](https://img.shields.io/badge/Status-Live%20%26%20Deployed-brightgreen?style=flat)
+![Companies](https://img.shields.io/badge/Companies-55-FF4D7A?style=flat)
+![Investors](https://img.shields.io/badge/Investors-22-8B5CF6?style=flat)
+![Products](https://img.shields.io/badge/Products-35-10B981?style=flat)
+
 **Live Frontend:** https://graph-one-three.vercel.app/  
 **Backend API:** https://graphone-k6m8.onrender.com/api/v1  
 **API Docs (Swagger):** https://graphone-k6m8.onrender.com/docs
