@@ -84,7 +84,7 @@ export function mapCompany(c: ApiCompany): Company {
     tags: (c.tags ?? []).map((t) => t.tag.name),
     founders: (c.founders ?? []).map((f) => ({ name: f.founder.name, role: f.role ?? "" })),
     productSlugs: (c.products ?? []).map((p) => p.slug),
-    investorSlugs: [...new Set(rounds.flatMap((r) => r.leads))],
+    investorSlugs: Array.from(new Set(rounds.flatMap((r) => r.leads))),
     rounds,
     similar: [],
     timeline: rounds.map((r) => ({ year: String(r.year), label: `${r.stage} · ${r.amount}` })),
