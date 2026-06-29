@@ -200,9 +200,9 @@ function SimilarCompanies({ c }: { c: Company }) {
   );
 }
 
-export function CompanyProfile({ slug }: { slug: string }) {
+export function CompanyProfile({ slug, company }: { slug: string; company?: Company }) {
   const router = useRouter();
-  const c = GODATA.companyBySlug[slug] ?? GODATA.companies[0];
+  const c = company ?? GODATA.companyBySlug[slug] ?? GODATA.companies[0];
   if (!c) return null;
 
   return (

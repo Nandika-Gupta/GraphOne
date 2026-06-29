@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Briefcase, MapPin, Calendar, Check, ArrowRight, TrendingUp, Users } from "lucide-react";
 import { GODATA } from "@/lib/data";
-import { LogoTile } from "@/components/ui/LogoTile";
 import type { Investor, InvestorSector } from "@/types";
+import { LogoTile } from "@/components/ui/LogoTile";
 
 function Panel({ children, title, action, onAction, style }: { children: React.ReactNode; title?: string; action?: string; onAction?: () => void; style?: React.CSSProperties }) {
   return (
@@ -262,9 +262,9 @@ function CoInvestors({ v }: { v: Investor }) {
   );
 }
 
-export function InvestorProfile({ slug }: { slug: string }) {
+export function InvestorProfile({ slug, investor }: { slug: string; investor?: Investor }) {
   const router = useRouter();
-  const v = GODATA.investorBySlug[slug] ?? GODATA.investors[0];
+  const v = investor ?? GODATA.investorBySlug[slug] ?? GODATA.investors[0];
   if (!v) return null;
 
   return (

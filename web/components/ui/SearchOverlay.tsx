@@ -23,48 +23,112 @@ const HREF_MAP: Record<ResultType, string> = {
   product: "/products",
 };
 
+async function liveSearch(q: string): Promise<{
+  companies: SearchResult[];
+  investors: SearchResult[];
+  products: SearchResult[];
+}> {
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000/api/v1";
+  try {
+    const res = await fetch(
+      `${base}/search?q=${encodeURIComponent(q)}&limit=5`,
+      { headers: { "X-API-Key": "dev-key-123" } },
+    );
+    if (!res.ok) throw new Error("bad response");
+    const body = await res.json() as {
+      data: {
+        companies: { slug: string; name: string }[];
+        investors: { slug: string; name: string }[];
+        products: { slug: string; name: string }[];
+      };
+    };
+    const D = body.data;
+    return {
+      companies: D.companies.map((c) => ({ type: "company", slug: c.slug, name: c.name, meta: "" })),
+      investors: D.investors.map((v) => ({ type: "investor", slug: v.slug, name: v.name, meta: "" })),
+      products: D.products.map((p) => ({ type: "product", slug: p.slug, name: p.name, meta: "" })),
+    };
+  } catch {
+    return { companies: [], investors: [], products: [] };
+  }
+}
+
 export function SearchOverlay() {
   const { searchOpen, closeSearch } = useApp();
   const router = useRouter();
   const [q, setQ] = useState("");
   const [activeIdx, setActiveIdx] = useState(0);
+  const [apiResults, setApiResults] = useState<{
+    companies: SearchResult[];
+    investors: SearchResult[];
+    products: SearchResult[];
+  } | null>(null);
+  const [searching, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (searchOpen) {
       setQ("");
       setActiveIdx(0);
+      setApiResults(null);
       const t = setTimeout(() => inputRef.current?.focus(), 30);
       return () => clearTimeout(t);
     }
   }, [searchOpen]);
+
+  useEffect(() => {
+    clearTimeout(timerRef.current);
+    const ql = q.trim();
+    if (ql.length < 2) { setApiResults(null); return; }
+    setSearching(true);
+    timerRef.current = setTimeout(async () => {
+      const results = await liveSearch(ql);
+      setApiResults(results);
+      setSearching(false);
+      setActiveIdx(0);
+    }, 300);
+    return () => clearTimeout(timerRef.current);
+  }, [q]);
 
   if (!searchOpen) return null;
 
   const ql = q.trim().toLowerCase();
   const D = GODATA;
 
-  const cos: SearchResult[] = (ql
-    ? D.companies.filter((c) => c.name.toLowerCase().includes(ql) || c.cat.toLowerCase().includes(ql) || c.tags.join(" ").toLowerCase().includes(ql))
-    : D.companies.slice().sort((a, b) => b.employees - a.employees)
-  ).slice(0, 5).map((c) => ({ type: "company" as const, slug: c.slug, name: c.name, meta: c.cat }));
+  let cos: SearchResult[];
+  let invs: SearchResult[];
+  let prods: SearchResult[];
+  let founders: SearchResult[];
 
-  const invs: SearchResult[] = (ql
-    ? D.investors.filter((v) => v.name.toLowerCase().includes(ql) || v.type.toLowerCase().includes(ql))
-    : D.investors.slice(0, 4)
-  ).slice(0, 4).map((v) => ({ type: "investor" as const, slug: v.slug, name: v.name, meta: v.type }));
+  if (apiResults && ql.length >= 2) {
+    cos = apiResults.companies;
+    invs = apiResults.investors;
+    prods = apiResults.products;
+    founders = [];
+  } else {
+    cos = (ql
+      ? D.companies.filter((c) => c.name.toLowerCase().includes(ql) || c.cat.toLowerCase().includes(ql))
+      : D.companies.slice().sort((a, b) => b.employees - a.employees)
+    ).slice(0, 5).map((c) => ({ type: "company" as const, slug: c.slug, name: c.name, meta: c.cat }));
 
-  const prods: SearchResult[] = ql
-    ? D.products.filter((p) => p.name.toLowerCase().includes(ql) || p.category.toLowerCase().includes(ql))
-        .slice(0, 4).map((p) => ({ type: "product" as const, slug: p.slug, name: p.name, meta: p.category }))
-    : [];
+    invs = (ql
+      ? D.investors.filter((v) => v.name.toLowerCase().includes(ql) || v.type.toLowerCase().includes(ql))
+      : D.investors.slice(0, 4)
+    ).slice(0, 4).map((v) => ({ type: "investor" as const, slug: v.slug, name: v.name, meta: v.type }));
 
-  const founders: SearchResult[] = ql
-    ? D.companies.flatMap((c) => c.founders.map((f) => ({
-        type: "company" as const, slug: c.slug, name: f.name,
-        meta: f.role + " · " + c.name, isFounder: true,
-      }))).filter((f) => f.name.toLowerCase().includes(ql)).slice(0, 4)
-    : [];
+    prods = ql
+      ? D.products.filter((p) => p.name.toLowerCase().includes(ql) || p.category.toLowerCase().includes(ql))
+          .slice(0, 4).map((p) => ({ type: "product" as const, slug: p.slug, name: p.name, meta: p.category }))
+      : [];
+
+    founders = ql
+      ? D.companies.flatMap((c) => c.founders.map((f) => ({
+          type: "company" as const, slug: c.slug, name: f.name,
+          meta: f.role + " · " + c.name, isFounder: true,
+        }))).filter((f) => f.name.toLowerCase().includes(ql)).slice(0, 4)
+      : [];
+  }
 
   const groups: [string, SearchResult[]][] = (
     [
@@ -76,7 +140,7 @@ export function SearchOverlay() {
   ).filter(([, items]) => items.length > 0);
 
   const flat = groups.flatMap(([, items]) => items);
-  const empty = ql.length > 0 && flat.length === 0;
+  const empty = ql.length > 0 && flat.length === 0 && !searching;
 
   const pick = (r: SearchResult) => {
     router.push(HREF_MAP[r.type] + "/" + r.slug);
@@ -87,7 +151,7 @@ export function SearchOverlay() {
     if (e.key === "Escape") closeSearch();
     else if (e.key === "ArrowDown") { e.preventDefault(); setActiveIdx((i) => Math.min(i + 1, flat.length - 1)); }
     else if (e.key === "ArrowUp") { e.preventDefault(); setActiveIdx((i) => Math.max(i - 1, 0)); }
-    else if (e.key === "Enter" && flat[activeIdx]) pick(flat[activeIdx]);
+    else if (e.key === "Enter" && flat[activeIdx]) pick(flat[activeIdx]!);
   };
 
   let idx = -1;
@@ -102,7 +166,7 @@ export function SearchOverlay() {
         style={{ width: "min(620px, 100%)", background: "var(--surface-card)", border: "1px solid var(--border-subtle)", borderRadius: 18, boxShadow: "var(--shadow-pop)", overflow: "hidden" }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 18px", borderBottom: "1px solid var(--border-subtle)" }}>
-          <Search size={20} color="var(--gray-400)" />
+          <Search size={20} color={searching ? "var(--rose-500)" : "var(--gray-400)"} />
           <input
             ref={inputRef} value={q}
             onChange={(e) => { setQ(e.target.value); setActiveIdx(0); }}

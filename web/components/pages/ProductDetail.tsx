@@ -4,10 +4,11 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, Heart, Trophy, LayoutGrid, ArrowRight } from "lucide-react";
 import { GODATA } from "@/lib/data";
 import { LogoTile } from "@/components/ui/LogoTile";
+import type { Product } from "@/types";
 
-export function ProductDetail({ slug }: { slug: string }) {
+export function ProductDetail({ slug, product }: { slug: string; product?: Product }) {
   const router = useRouter();
-  const p = GODATA.productBySlug[slug] ?? GODATA.products[0];
+  const p = product ?? GODATA.productBySlug[slug] ?? GODATA.products[0];
   if (!p) return null;
 
   const company = p.companySlug ? GODATA.companyBySlug[p.companySlug] : undefined;
