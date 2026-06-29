@@ -45,6 +45,10 @@ export const CompanyRepository = {
         tags: { include: { tag: true } },
         founders: { include: { founder: true } },
         products: { orderBy: { upvotes: "desc" } },
+        fundingRounds: {
+          orderBy: { announcedAt: "desc" },
+          include: { investors: { include: { investor: true } } },
+        },
       },
     });
   },

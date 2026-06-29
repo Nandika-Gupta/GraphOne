@@ -21,8 +21,33 @@ export function serializeCompany(c: any) {
     growthScore: c.growthScore ?? 0,
     dataConfidenceScore: c.dataConfidenceScore ?? 0,
     trendingScore: c.trendingScore ?? 0,
-    category: c.category ? { slug: c.category.slug, name: c.category.name } : null,
-    tags: Array.isArray(c.tags) ? c.tags.map((t: any) => t.tag?.name ?? t.name).filter(Boolean) : [],
+    category: c.category
+      ? { slug: c.category.slug, name: c.category.name, colorHex: c.category.colorHex ?? null }
+      : null,
+    tags: Array.isArray(c.tags)
+      ? c.tags.map((t: any) => ({ tag: { name: t.tag?.name ?? t.name ?? String(t) } }))
+      : [],
+    founders: Array.isArray(c.founders)
+      ? c.founders.map((f: any) => ({ role: f.role ?? null, founder: { name: f.founder?.name ?? "" } }))
+      : [],
+    products: Array.isArray(c.products)
+      ? c.products.map((p: any) => ({ slug: p.slug }))
+      : [],
+    fundingRounds: Array.isArray(c.fundingRounds)
+      ? c.fundingRounds.map((r: any) => ({
+          id: r.id,
+          stage: r.stage,
+          amountUsd: big(r.amountUsd) ?? 0,
+          valuationUsd: r.valuationUsd ? big(r.valuationUsd) : null,
+          announcedAt: r.announcedAt,
+          investors: Array.isArray(r.investors)
+            ? r.investors.map((i: any) => ({
+                isLead: i.isLead,
+                investor: { slug: i.investor?.slug ?? "", name: i.investor?.name ?? "" },
+              }))
+            : [],
+        }))
+      : [],
     lastScrapedAt: c.lastScrapedAt ?? null,
   };
 }
