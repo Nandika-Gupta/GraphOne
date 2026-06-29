@@ -162,28 +162,6 @@ const recent = investments.slice(0, 6).map((e) => ({
     return { label: `Q${Math.ceil((d.getMonth() + 1) / 3)} '${String(d.getFullYear()).slice(2)}`, deals };
   });
 
-  const recent = investments.slice(0, 6).map((e) => ({
-    companySlug: e.round.company.slug,
-    company: e.round.company.name,
-    cat: e.round.company.category?.name ?? "AI",
-    stage: STAGE_LABELS[e.round.stage] ?? e.round.stage.replace(/_/g, " "),
-    amount: fmtUsd(e.round.amountUsd),
-    role: e.isLead ? "Lead Investor" : "Co-Investor",
-  }));
-
-  // Quarterly velocity — last 4 quarters
-  const velocity = Array.from({ length: 4 }, (_, i) => {
-    const qi = 3 - i;
-    const endMs = now - qi * 91 * 86_400_000;
-    const startMs = endMs - 91 * 86_400_000;
-    const d = new Date(endMs);
-    const deals = investments.filter((e) => {
-      const t = new Date(e.round.announcedAt).getTime();
-      return t >= startMs && t < endMs;
-    }).length;
-    return { label: `Q${Math.ceil((d.getMonth() + 1) / 3)} '${String(d.getFullYear()).slice(2)}`, deals };
-  });
-
   // Sector concentration from portfolio categories
   const catCounts = new Map<string, number>();
   for (const e of investments) {
